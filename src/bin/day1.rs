@@ -4,7 +4,7 @@ pqr3stu8vwx
 a1b2c3d4e5f
 treb7uchet";
 
-const REAL_INPUT: &str = "
+pub const REAL_INPUT: &str = "
 sixsrvldfour4seven
 53hvhgchljnlxqjsgrhxgf1zfoureightmlhvvv
 fives2dznl
