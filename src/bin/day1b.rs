@@ -1,6 +1,3 @@
-mod day1;
-use crate::day1::REAL_INPUT;
-
 const TEST_INPUT: &str = "
 two1nine
 eightwothree
@@ -58,6 +55,7 @@ fn main() {
     let test_res = day1b(TEST_INPUT);
     print!("test: {test_res}\n");
 
-    let real_res = day1b(REAL_INPUT);
+    let test_data = std::fs::read_to_string("data/day1.txt").unwrap();
+    let real_res = day1b(&test_data);
     print!("real: {real_res}\n");
 }
