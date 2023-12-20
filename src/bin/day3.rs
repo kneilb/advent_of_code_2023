@@ -23,7 +23,7 @@ impl Number {
                 && s.col >= col_start
                 && s.col <= self.right_col + 1
             {
-                print!("NAB: Decided that {:?} is adjacent to {:?}!\n", self, s);
+                // print!("NAB: Decided that {:?} is adjacent to {:?}!\n", self, s);
                 return true;
             }
         }
@@ -52,6 +52,17 @@ fn process(data: &str) -> u32 {
                     left_col = col;
                 }
                 num_chars = format!("{}{}", num_chars, char);
+
+                // TODO: ugly hack!!
+                if col == line.len() - 1 {
+                    let val: u32 = num_chars.parse().unwrap();
+                    numbers.push(Number {
+                        val,
+                        row,
+                        left_col,
+                        right_col: col, // we're at the end of the number
+                    });
+                }
             } else {
                 if num_chars.len() > 0 {
                     let val: u32 = num_chars.parse().unwrap();
@@ -110,12 +121,20 @@ mod test {
     }
 
     #[test]
+    fn testicle_2() {
+        let data = std::fs::read_to_string("data/day3_test_2.txt").unwrap();
+
+        let sum = process(&data);
+        assert_eq!(sum, 4362);
+    }
+
+    #[test]
     fn test_larger() {
         let data = std::fs::read_to_string("data/day3.txt").unwrap();
 
         let sum = process(&data);
-        assert_ne!(sum, 531318); // too high!
-        assert_ne!(sum, 525642); // too low!
-                                 // TODO! This is the wrong answer...!
+        assert_ne!(sum, 531318); // too high! (caused by off by one)
+        assert_ne!(sum, 525642); // too low! (caused by missing numbers that ended at the end of the row)
+        assert_eq!(sum, 527144); // yay!
     }
 }
