@@ -23,7 +23,7 @@ impl Number {
                 && s.col >= col_start
                 && s.col <= self.right_col + 1
             {
-                // print!("NAB: Decided that {:?} is adjacent to {:?}!\n", self, s);
+                print!("NAB: Decided that {:?} is adjacent to {:?}!\n", self, s);
                 return true;
             }
         }
@@ -42,34 +42,30 @@ fn process(data: &str) -> u32 {
     let mut numbers: Vec<Number> = vec![];
     let mut symbols: Vec<Symbol> = vec![];
 
-    for (line_index, line) in data.lines().enumerate() {
-        let mut start_col = 0;
+    for (row, line) in data.lines().enumerate() {
+        let mut left_col = 0;
         let mut num_chars = String::new();
 
-        for (char_index, char) in line.chars().enumerate() {
+        for (col, char) in line.chars().enumerate() {
             if char.is_numeric() {
                 if num_chars.is_empty() {
-                    start_col = char_index;
+                    left_col = col;
                 }
                 num_chars = format!("{}{}", num_chars, char);
             } else {
                 if num_chars.len() > 0 {
-                    let num: u32 = num_chars.parse().unwrap();
+                    let val: u32 = num_chars.parse().unwrap();
                     num_chars = String::new();
                     numbers.push(Number {
-                        val: num,
-                        row: line_index,
-                        left_col: start_col,
-                        right_col: char_index,
+                        val,
+                        row,
+                        left_col,
+                        right_col: col - 1, // we're one character past the end of the number
                     });
                 }
 
                 if char != '.' {
-                    symbols.push(Symbol {
-                        char,
-                        row: line_index,
-                        col: char_index,
-                    })
+                    symbols.push(Symbol { char, row, col });
                 }
             }
         }
@@ -118,7 +114,8 @@ mod test {
         let data = std::fs::read_to_string("data/day3.txt").unwrap();
 
         let sum = process(&data);
-        assert_ne!(sum, 531318);
-        // TODO! This is the wrong answer...!
+        assert_ne!(sum, 531318); // too high!
+        assert_ne!(sum, 525642); // too low!
+                                 // TODO! This is the wrong answer...!
     }
 }
