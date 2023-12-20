@@ -5,20 +5,6 @@ struct Round {
     blue: u32,
 }
 
-impl Round {
-    fn new(red: u32, green: u32, blue: u32) -> Round {
-        Round { red, green, blue }
-    }
-
-    fn parse(section: &str) -> Round {
-        Round {
-            red: 0,
-            green: 0,
-            blue: 0,
-        }
-    }
-}
-
 #[derive(Debug)]
 struct Game {
     id: u32,
@@ -37,19 +23,23 @@ impl Game {
         let mut rounds = vec![];
 
         for round_string in remains.split(";") {
-            rounds.push(
-                Round {
-                    red: get_colour(round_string, "red"),
-                    green: get_colour(round_string, "green"),
-                    blue: get_colour(round_string, "blue"),
-                }
-            );
+            rounds.push(Round {
+                red: get_colour(round_string, "red"),
+                green: get_colour(round_string, "green"),
+                blue: get_colour(round_string, "blue"),
+            });
         }
 
-        Some(Game {
-            id,
-            rounds,
-        })
+        Some(Game { id, rounds })
+    }
+
+    fn is_possible(&self, red: u32, green: u32, blue: u32) -> bool {
+        for r in &self.rounds {
+            if r.red > red || r.green > green || r.blue > blue {
+                return false;
+            }
+        }
+        true
     }
 }
 
@@ -65,7 +55,40 @@ fn get_colour(source: &str, colour: &str) -> u32 {
     0
 }
 
-fn main() {}
+fn process(data: &str) -> u32 {
+    let mut games = vec![];
+    for line in data.lines() {
+        if let Some(game) = Game::parse(&line) {
+            games.push(game);
+        }
+    }
+
+    let mut sum = 0;
+    for g in &games {
+        if g.is_possible(12, 13, 14) {
+            sum += g.id;
+        }
+    }
+    // let sum: u32 = games.iter().filter(|game| {
+    //     let game = game.unwrap();
+    //     for r in game.rounds.iter() {
+    //         if r.red > 12 || r.green > 13 || r.blue > 14 {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }).map(|game| {
+    //     game.unwrap_or(Game{id: 0, rounds: vec![]}).id
+    // }).sum();
+    sum
+}
+
+fn main() {
+    let data = std::fs::read_to_string("data/day2.txt").unwrap();
+    let sum = process(&data);
+
+    print!("The answer is {}\n", sum);
+}
 
 #[cfg(test)]
 mod test {
@@ -78,7 +101,7 @@ mod test {
 
         assert_eq!(game.id, 1);
         assert_eq!(game.rounds.len(), 3);
-        
+
         assert_eq!(game.rounds[0].red, 9);
         assert_eq!(game.rounds[0].green, 6);
         assert_eq!(game.rounds[0].blue, 5);
@@ -95,11 +118,16 @@ mod test {
     #[test]
     fn test_example_data() {
         let data = std::fs::read_to_string("data/day2_test.txt").unwrap();
-        let mut games = vec![];
-        for line in data.lines() {
-            games.push(Game::parse(&line));
-        }
-        
-        print!("{:?}", games);
+        let sum = process(&data);
+
+        assert_eq!(sum, 8);
+    }
+
+    #[test]
+    fn test_day2_data() {
+        let data = std::fs::read_to_string("data/day2.txt").unwrap();
+        let sum = process(&data);
+
+        assert_eq!(sum, 2278);
     }
 }
