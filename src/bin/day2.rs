@@ -63,24 +63,13 @@ fn process(data: &str) -> u32 {
         }
     }
 
-    let mut sum = 0;
-    for g in &games {
-        if g.is_possible(12, 13, 14) {
-            sum += g.id;
+    games.iter().filter_map(|game| {
+        if game.is_possible(12, 13, 14) {
+            Some(game.id)
+        } else {
+            None
         }
-    }
-    // let sum: u32 = games.iter().filter(|game| {
-    //     let game = game.unwrap();
-    //     for r in game.rounds.iter() {
-    //         if r.red > 12 || r.green > 13 || r.blue > 14 {
-    //             return false;
-    //         }
-    //     }
-    //     return true;
-    // }).map(|game| {
-    //     game.unwrap_or(Game{id: 0, rounds: vec![]}).id
-    // }).sum();
-    sum
+    }).sum()
 }
 
 fn main() {
