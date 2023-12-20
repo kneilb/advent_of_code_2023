@@ -12,6 +12,7 @@ impl Number {
         // 1:     0  1a 2a 3  4
         // 2:     0  1  2  3  4
 
+        // TODO: avoid this nonsense: switch to i32?
         let row_start = if self.row > 0 { self.row - 1 } else { self.row };
         let col_start = if self.left_col > 0 {
             self.left_col - 1
@@ -39,12 +40,6 @@ struct Symbol {
     char: char,
     row: usize,
     col: usize,
-}
-
-impl Symbol {
-    fn find_adjacent(&self, numbers: &Vec<Number>) {
-
-    }
 }
 
 fn parse_locations(data: &str) -> (Vec<Number>, Vec<Symbol>) {
@@ -96,35 +91,30 @@ fn parse_locations(data: &str) -> (Vec<Number>, Vec<Symbol>) {
 fn process(data: &str) -> u32 {
     let (numbers, symbols) = parse_locations(data);
 
-    numbers.iter().map(|n| {
-        if n.any_adjacent(&symbols) {
-            n.val
-        } else { 0 }
-    }).sum()
+    numbers
+        .iter()
+        .map(|n| if n.any_adjacent(&symbols) { n.val } else { 0 })
+        .sum()
 }
 
 fn process_b(data: &str) -> u32 {
     let (numbers, symbols) = parse_locations(data);
 
-    let mut sum = 0;
-
-    for s in symbols {
-        let adjacent_numbers: Vec<&Number> = numbers.iter().filter(|n| n.is_adjacent(&s)).collect();
-        if adjacent_numbers.len() == 2 {
-            let first = adjacent_numbers[0].val;
-            let second = adjacent_numbers[1].val;
-            sum += first * second;
-        }
-    }
-    sum
+    symbols
+        .iter()
+        .map(|s| {
+            let adjacent_numbers: Vec<&Number> =
+                numbers.iter().filter(|n| n.is_adjacent(&s)).collect();
+            if s.char == '*' && adjacent_numbers.len() == 2 {
+                adjacent_numbers[0].val * adjacent_numbers[1].val
+            } else {
+                0
+            }
+        })
+        .sum()
 }
 
 fn main() {
-    // let data = std::fs::read_to_string("data/day3_test.txt").unwrap();
-
-    // let sum = process(&data);
-    // print!("Sum is {}\n", sum);
-
     let data = std::fs::read_to_string("data/day3.txt").unwrap();
 
     let sum = process(&data);
@@ -155,7 +145,7 @@ mod test {
     }
 
     #[test]
-    fn test_larger() {
+    fn test() {
         let data = std::fs::read_to_string("data/day3.txt").unwrap();
 
         let sum = process(&data);
@@ -170,5 +160,13 @@ mod test {
 
         let sum = process_b(&data);
         assert_eq!(sum, 467835);
+    }
+
+    #[test]
+    fn test_b() {
+        let data = std::fs::read_to_string("data/day3.txt").unwrap();
+
+        let sum = process_b(&data);
+        assert_eq!(sum, 81463996);
     }
 }
