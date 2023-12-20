@@ -56,20 +56,16 @@ fn get_colour(source: &str, colour: &str) -> u32 {
 }
 
 fn process(data: &str) -> u32 {
-    let mut games = vec![];
-    for line in data.lines() {
-        if let Some(game) = Game::parse(&line) {
-            games.push(game);
-        }
-    }
-
-    games.iter().filter_map(|game| {
-        if game.is_possible(12, 13, 14) {
-            Some(game.id)
-        } else {
-            None
-        }
-    }).sum()
+    data.lines()
+        .filter_map(|line| Game::parse(&line))
+        .filter_map(|game| {
+            if game.is_possible(12, 13, 14) {
+                Some(game.id)
+            } else {
+                None
+            }
+        })
+        .sum()
 }
 
 fn main() {
