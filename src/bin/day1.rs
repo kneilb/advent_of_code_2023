@@ -1,9 +1,3 @@
-const TEST_INPUT: &str = "
-1abc2
-pqr3stu8vwx
-a1b2c3d4e5f
-treb7uchet";
-
 fn day1(input: &str) -> u32 {
     input
         .lines()
@@ -18,11 +12,21 @@ fn day1(input: &str) -> u32 {
         .sum()
 }
 
-fn main() {
-    let test_res = day1(TEST_INPUT);
-    print!("test: {test_res}\n");
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let test_data = std::fs::read_to_string("data/day1.txt").unwrap();
-    let real_res = day1(&test_data);
-    print!("real: {real_res}\n");
+    #[test]
+    fn test_input() {
+        let test_data = std::fs::read_to_string("data/day1_test.txt").unwrap();
+        let result = day1(&test_data);
+        assert_eq!(result, 142);
+    }
+
+    #[test]
+    fn real_input() {
+        let test_data = std::fs::read_to_string("data/day1.txt").unwrap();
+        let result = day1(&test_data);
+        assert_eq!(result, 54561);
+    }
 }

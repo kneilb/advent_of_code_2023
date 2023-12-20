@@ -1,12 +1,3 @@
-const TEST_INPUT: &str = "
-two1nine
-eightwothree
-abcone2threexyz
-xtwone3four
-4nineeightseven2
-zoneight234
-7pqrstsixteen";
-
 const NUMS: [&str; 9] = [
     "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
 ];
@@ -24,17 +15,13 @@ fn string_to_digit(input: &str) -> String {
         }
         if found != 0 {
             res = format!("{}{}", res, found);
-            // print!("NAB: found number {}, adding {} -> {}\n", slice, found + 1, res);
-        }
-        else {
+        } else {
             res = format!("{}{}", res, slice.chars().next().unwrap());
         }
     }
-    
-    // println!("NAB: returning {}", res);
+
     res
 }
-
 
 fn day1b(input: &str) -> u32 {
     input
@@ -51,11 +38,21 @@ fn day1b(input: &str) -> u32 {
         .sum()
 }
 
-fn main() {
-    let test_res = day1b(TEST_INPUT);
-    print!("test: {test_res}\n");
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let test_data = std::fs::read_to_string("data/day1.txt").unwrap();
-    let real_res = day1b(&test_data);
-    print!("real: {real_res}\n");
+    #[test]
+    fn test_input() {
+        let test_data = std::fs::read_to_string("data/day1b_test.txt").unwrap();
+        let result = day1b(&test_data);
+        assert_eq!(result, 281);
+    }
+
+    #[test]
+    fn real_input() {
+        let test_data = std::fs::read_to_string("data/day1.txt").unwrap();
+        let result = day1b(&test_data);
+        assert_eq!(result, 54076);
+    }
 }
