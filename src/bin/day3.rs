@@ -7,27 +7,30 @@ struct Number {
 }
 
 impl Number {
-    fn is_adjacent(&self, symbols: &Vec<Symbol>) -> bool {
+    fn is_adjacent(&self, symbol: &Symbol) -> bool {
         // 0:     0  1  2  3  4
         // 1:     0  1a 2a 3  4
         // 2:     0  1  2  3  4
+
+        let row_start = if self.row > 0 { self.row - 1 } else { self.row };
+        let col_start = if self.left_col > 0 {
+            self.left_col - 1
+        } else {
+            self.left_col
+        };
+        symbol.row >= row_start
+            && symbol.row <= self.row + 1
+            && symbol.col >= col_start
+            && symbol.col <= self.right_col + 1
+    }
+
+    fn any_adjacent(&self, symbols: &Vec<Symbol>) -> bool {
         for s in symbols {
-            let row_start = if self.row > 0 { self.row - 1 } else { self.row };
-            let col_start = if self.left_col > 0 {
-                self.left_col - 1
-            } else {
-                self.left_col
-            };
-            if s.row >= row_start
-                && s.row <= self.row + 1
-                && s.col >= col_start
-                && s.col <= self.right_col + 1
-            {
-                // print!("NAB: Decided that {:?} is adjacent to {:?}!\n", self, s);
+            if self.is_adjacent(s) {
                 return true;
             }
         }
-        return false;
+        false
     }
 }
 
@@ -38,7 +41,13 @@ struct Symbol {
     col: usize,
 }
 
-fn process(data: &str) -> u32 {
+impl Symbol {
+    fn find_adjacent(&self, numbers: &Vec<Number>) {
+
+    }
+}
+
+fn parse_locations(data: &str) -> (Vec<Number>, Vec<Symbol>) {
     let mut numbers: Vec<Number> = vec![];
     let mut symbols: Vec<Symbol> = vec![];
 
@@ -53,7 +62,7 @@ fn process(data: &str) -> u32 {
                 }
                 num_chars = format!("{}{}", num_chars, char);
 
-                // TODO: ugly hack!!
+                // TODO: ugly repetition
                 if col == line.len() - 1 {
                     let val: u32 = num_chars.parse().unwrap();
                     numbers.push(Number {
@@ -81,18 +90,32 @@ fn process(data: &str) -> u32 {
             }
         }
     }
+    (numbers, symbols)
+}
 
-    // print!("NAB: symbols are: {:?}", symbols);
-    // print!("NAB: numbers are: {:?}", numbers);
+fn process(data: &str) -> u32 {
+    let (numbers, symbols) = parse_locations(data);
+
+    numbers.iter().map(|n| {
+        if n.any_adjacent(&symbols) {
+            n.val
+        } else { 0 }
+    }).sum()
+}
+
+fn process_b(data: &str) -> u32 {
+    let (numbers, symbols) = parse_locations(data);
 
     let mut sum = 0;
 
-    for num in numbers {
-        if num.is_adjacent(&symbols) {
-            sum += num.val;
+    for s in symbols {
+        let adjacent_numbers: Vec<&Number> = numbers.iter().filter(|n| n.is_adjacent(&s)).collect();
+        if adjacent_numbers.len() == 2 {
+            let first = adjacent_numbers[0].val;
+            let second = adjacent_numbers[1].val;
+            sum += first * second;
         }
     }
-
     sum
 }
 
@@ -106,6 +129,9 @@ fn main() {
 
     let sum = process(&data);
     print!("Sum is {}\n", sum);
+
+    let sum = process_b(&data);
+    print!("Gear ratio sum is {}\n", sum);
 }
 
 #[cfg(test)]
@@ -136,5 +162,13 @@ mod test {
         assert_ne!(sum, 531318); // too high! (caused by off by one)
         assert_ne!(sum, 525642); // too low! (caused by missing numbers that ended at the end of the row)
         assert_eq!(sum, 527144); // yay!
+    }
+
+    #[test]
+    fn testicle_b() {
+        let data = std::fs::read_to_string("data/day3b_test.txt").unwrap();
+
+        let sum = process_b(&data);
+        assert_eq!(sum, 467835);
     }
 }
