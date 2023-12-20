@@ -5,6 +5,12 @@ struct Round {
     blue: u32,
 }
 
+impl Round {
+    fn power(&self) -> u32 {
+        self.red * self.green * self.blue
+    }
+}
+
 #[derive(Debug)]
 struct Game {
     id: u32,
@@ -41,12 +47,30 @@ impl Game {
         }
         true
     }
+
+    fn get_minima(&self) -> Round {
+        let mut red = 0;
+        let mut green = 0;
+        let mut blue = 0;
+        for r in &self.rounds {
+            if r.red > red {
+                red = r.red;
+            }
+            if r.green > green {
+                green = r.green;
+            }
+            if r.blue > blue {
+                blue = r.blue;
+            }
+        }
+        Round { red, green, blue }
+    }
 }
 
 fn get_colour(source: &str, colour: &str) -> u32 {
     for colour_string in source.split(",") {
         let mut colour_parts = colour_string.split_whitespace();
-        let num: u32 = colour_parts.next().unwrap().parse().unwrap();
+        let num = colour_parts.next().unwrap().parse().unwrap();
         let found_colour = colour_parts.next().unwrap().trim();
         if colour == found_colour {
             return num;
@@ -68,11 +92,22 @@ fn process(data: &str) -> u32 {
         .sum()
 }
 
+fn process_b(data: &str) -> u32 {
+    data.lines()
+        .filter_map(|line| Game::parse(&line))
+        .map(|game| game.get_minima())
+        .map(|round| round.power())
+        .sum()
+}
+
 fn main() {
     let data = std::fs::read_to_string("data/day2.txt").unwrap();
-    let sum = process(&data);
 
+    let sum = process(&data);
     print!("The answer is {}\n", sum);
+
+    let power_sum = process_b(&data);
+    print!("The second answer is {}\n", power_sum);
 }
 
 #[cfg(test)]
@@ -114,5 +149,21 @@ mod test {
         let sum = process(&data);
 
         assert_eq!(sum, 2278);
+    }
+
+    #[test]
+    fn test_example_data_b() {
+        let data = std::fs::read_to_string("data/day2_test.txt").unwrap();
+        let power_sum = process_b(&data);
+
+        assert_eq!(power_sum, 2286);
+    }
+
+    #[test]
+    fn test_day2_data_b() {
+        let data = std::fs::read_to_string("data/day2.txt").unwrap();
+        let sum = process_b(&data);
+
+        assert_eq!(sum, 67953);
     }
 }
