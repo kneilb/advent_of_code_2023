@@ -24,17 +24,16 @@ struct Map {
 
 impl Map {
     fn parse(line: &str) -> Map {
-        let header: Vec<&str> = line
-            .split_whitespace()
-            .next()
-            .unwrap()
-            .split("-")
-            .collect();
+        let header: Vec<&str> = line.split_whitespace().next().unwrap().split("-").collect();
 
         let from = header[0].to_owned();
         let to = header[2].to_owned();
 
-        Map { from, to, ranges: Vec::new() }
+        Map {
+            from,
+            to,
+            ranges: Vec::new(),
+        }
     }
 
     fn apply_map(&self, val: u64) -> u64 {
@@ -89,9 +88,32 @@ fn process(input: &str) -> u64 {
         .unwrap()
 }
 
+fn process_b(input: &str) -> u64 {
+    let seeds = parse_seeds(input);
+    let maps = parse_maps(input);
+
+    seeds
+        .windows(2)
+        .step_by(2)
+        .map(|w| {
+            (w[0]..w[0] + w[1])
+                .map(|s| {
+                    let mut val = s;
+                    for m in &maps {
+                        val = m.apply_map(val);
+                    }
+                    val
+                })
+                .min()
+                .unwrap()
+        })
+        .min()
+        .unwrap()
+}
+
 fn main() {
     let data = std::fs::read_to_string("data/day5.txt").unwrap();
-    let res = process(&data);
+    let res = process_b(&data);
     print!("Result is: {}\n", res);
 }
 
@@ -100,7 +122,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn testicle_1() {
+    fn testicle() {
         let data = std::fs::read_to_string("data/day5_test.txt").unwrap();
         let res = process(&data);
         assert_eq!(res, 35);
@@ -111,5 +133,12 @@ mod test {
         let data = std::fs::read_to_string("data/day5.txt").unwrap();
         let res = process(&data);
         assert_eq!(res, 88151870);
+    }
+
+    #[test]
+    fn testicle_b() {
+        let data = std::fs::read_to_string("data/day5_test.txt").unwrap();
+        let res = process_b(&data);
+        assert_eq!(res, 46);
     }
 }
