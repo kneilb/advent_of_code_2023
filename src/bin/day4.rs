@@ -1,20 +1,43 @@
+use std::collections::HashMap;
+
+#[derive(Debug)]
 struct Card {
     num: u32,
     winners: Vec<u32>,
     numbers: Vec<u32>,
 }
 
+impl FromIterator<Card> for HashMap<u32, Card> {
+    fn from_iter<T: IntoIterator<Item = Card>>(iter: T) -> Self {
+        let mut ret = HashMap::new();
+        for c in iter {
+            ret.insert(c.num, c);
+        }
+        ret
+    }
+}
+
 impl Card {
     fn parse(line: &str) -> Card {
-        let num = 0;
         let mut parts = line.split(":");
-        parts.next();
-        let part_two = parts.next().unwrap();
+        let mut header = parts.next().unwrap().split_whitespace();
+        header.next();
+        let num = header.next().unwrap().parse().unwrap();
 
-        let mut things = part_two.split("|");
+        let mut numbers = parts.next().unwrap().split("|");
 
-        let winners = things.next().unwrap().split_whitespace().map(|x| x.parse().unwrap()).collect();
-        let numbers = things.next().unwrap().split_whitespace().map(|x| x.parse().unwrap()).collect();
+        let winners = numbers
+            .next()
+            .unwrap()
+            .split_whitespace()
+            .map(|x| x.parse().unwrap())
+            .collect();
+        let numbers = numbers
+            .next()
+            .unwrap()
+            .split_whitespace()
+            .map(|x| x.parse().unwrap())
+            .collect();
 
         Card {
             num,
@@ -23,28 +46,38 @@ impl Card {
         }
     }
 
+    fn get_num_winners(&self) -> u32 {
+        self.numbers
+            .iter()
+            .filter(|n| self.winners.contains(n))
+            .collect::<Vec<_>>()
+            .len() as u32
+    }
+
+    // 0 1 2 4 8 16 32
+    // 0 1 2 3 4 5 6
+    // 2^(n - 1)
     fn get_points(&self) -> u32 {
-        let mut points = 0;
-        for n in &self.numbers {
-            if self.winners.contains(&n) {
-                if points == 0 {
-                    points = 1;
-                } else {
-                    points *= 2;
-                }
-            }
+        match self.get_num_winners() {
+            0 => 0,
+            n => 2_u32.pow(n - 1),
         }
-        points
     }
 }
 
 fn process_a(data: &str) -> u32 {
-    let mut cards: Vec<Card> = vec![];
-    for line in data.lines() {
-        cards.push(Card::parse(line));
-    }
+    data.lines()
+        .map(|line| Card::parse(line))
+        .map(|card| card.get_points())
+        .sum::<u32>()
+}
 
-    data.lines().map(|line| Card::parse(line)).map(|card| card.get_points()).sum()
+fn process_b(data: &str) -> u32 {
+    let mut cards: HashMap<u32, Card> = data.lines().map(|line| Card::parse(line)).collect();
+    for (k, c) in cards {
+        print!("key: {}, val: {:?}\n", k, c);
+    }
+    0
 }
 
 #[cfg(test)]
@@ -115,5 +148,14 @@ mod test {
         let result = process_a(&data);
 
         assert_eq!(result, 17782);
+    }
+
+    #[test]
+    fn testicle_b() {
+        let data = std::fs::read_to_string("data/day4_test.txt").unwrap();
+
+        let result = process_b(&data);
+
+        assert_eq!(result, 30);
     }
 }
