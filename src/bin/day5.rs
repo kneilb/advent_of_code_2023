@@ -1,0 +1,117 @@
+#[derive(Debug)]
+struct Range {
+    from: u32,
+    to: u32,
+    len: u32,
+}
+
+impl Range {
+    fn parse(line: &str) -> Range {
+        let mut it = line.split_whitespace();
+        let to = it.next().unwrap().parse().unwrap();
+        let from = it.next().unwrap().parse().unwrap();
+        let len = it.next().unwrap().parse().unwrap();
+        Range { from, to, len }
+    }
+}
+
+#[derive(Debug)]
+struct Map {
+    from: String,
+    to: String,
+    ranges: Vec<Range>,
+}
+
+impl Map {
+    fn parse(line: &str) -> Map {
+        let header: Vec<&str> = line
+            .split_whitespace()
+            .next()
+            .unwrap()
+            .split("-")
+            .collect();
+
+        // println!("NAB: {:?}\n", header);
+        let from = header[0].to_owned();
+        let to = header[2].to_owned();
+
+        Map { from, to, ranges: Vec::new() }
+    }
+
+    fn apply_map(&self, val: u32) -> u32 {
+        for r in &self.ranges {
+            if val >= r.from && val < r.from + r.len {
+                return val + r.to - r.from;
+            }
+        }
+        val
+    }
+}
+
+fn parse_seeds(input: &str) -> Vec<u32> {
+    let line = input.lines().next().unwrap();
+    let mut tokens = line.split("seeds: ");
+    tokens.next();
+    let rhs = tokens.next().unwrap();
+    rhs.split_whitespace().map(|v| v.parse().unwrap()).collect()
+}
+
+fn parse_maps(input: &str) -> Vec<Map> {
+    let mut maps: Vec<Map> = vec![];
+
+    for l in input.lines() {
+        if l.contains(" map:") {
+            // print!("Parsing map: {}\n", l);
+            maps.push(Map::parse(l));
+        } else if !l.is_empty() && !maps.is_empty() {
+            // print!("Non-empty line: {}\n", l);
+            let map = maps.last_mut().unwrap();
+            map.ranges.push(Range::parse(l));
+        } else {
+            // print!("Empty line!\n")
+        }
+    }
+    maps
+}
+
+fn process(input: &str) -> u32 {
+    let seeds = parse_seeds(input);
+    // print!("NAB: seeds are {:?}\n", seeds);
+    let maps = parse_maps(input);
+    // print!("NAB: maps are {:?}\n", maps);
+
+    seeds
+        .iter()
+        .map(|s| {
+            let mut val = *s;
+            for m in &maps {
+                val = m.apply_map(val);
+                // print!("Translated -> {}\n", val);
+            }
+            val
+        })
+        .min()
+        .unwrap()
+}
+
+fn main() {
+    let data = std::fs::read_to_string("data/day5_test.txt").unwrap();
+
+    let res = process(&data);
+
+    assert_eq!(res, 35);
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn testicle_1() {
+        let data = std::fs::read_to_string("data/day5_test.txt").unwrap();
+
+        let res = process(&data);
+
+        assert_eq!(res, 35);
+    }
+}
