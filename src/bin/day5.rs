@@ -31,7 +31,6 @@ impl Map {
             .split("-")
             .collect();
 
-        // println!("NAB: {:?}\n", header);
         let from = header[0].to_owned();
         let to = header[2].to_owned();
 
@@ -42,11 +41,11 @@ impl Map {
         for r in &self.ranges {
             if val >= r.from && val < r.from + r.len {
                 let new = val + r.to - r.from;
-                print!("{} to {}: {} -> {}\n", self.from, self.to, val, new);
+                // print!("{} to {}: {} -> {}\n", self.from, self.to, val, new);
                 return new;
             }
         }
-        print!("{} to {}: {} unchanged\n", self.from, self.to, val);
+        // print!("{} to {}: {} unchanged\n", self.from, self.to, val);
         val
     }
 }
@@ -64,14 +63,10 @@ fn parse_maps(input: &str) -> Vec<Map> {
 
     for l in input.lines() {
         if l.contains(" map:") {
-            // print!("Parsing map: {}\n", l);
             maps.push(Map::parse(l));
         } else if !l.is_empty() && !maps.is_empty() {
-            // print!("Non-empty line: {}\n", l);
             let map = maps.last_mut().unwrap();
             map.ranges.push(Range::parse(l));
-        } else {
-            // print!("Empty line!\n")
         }
     }
     maps
@@ -79,9 +74,7 @@ fn parse_maps(input: &str) -> Vec<Map> {
 
 fn process(input: &str) -> u64 {
     let seeds = parse_seeds(input);
-    // print!("NAB: seeds are {:?}\n", seeds);
     let maps = parse_maps(input);
-    // print!("NAB: maps are {:?}\n", maps);
 
     seeds
         .iter()
@@ -89,7 +82,6 @@ fn process(input: &str) -> u64 {
             let mut val = *s;
             for m in &maps {
                 val = m.apply_map(val);
-                // print!("Translated -> {}\n", val);
             }
             val
         })
@@ -98,11 +90,9 @@ fn process(input: &str) -> u64 {
 }
 
 fn main() {
-    let data = std::fs::read_to_string("data/day5_test.txt").unwrap();
-
+    let data = std::fs::read_to_string("data/day5.txt").unwrap();
     let res = process(&data);
-
-    assert_eq!(res, 35);
+    print!("Result is: {}\n", res);
 }
 
 #[cfg(test)]
@@ -112,18 +102,14 @@ mod test {
     #[test]
     fn testicle_1() {
         let data = std::fs::read_to_string("data/day5_test.txt").unwrap();
-
         let res = process(&data);
-
         assert_eq!(res, 35);
     }
 
     #[test]
     fn test() {
         let data = std::fs::read_to_string("data/day5.txt").unwrap();
-
         let res = process(&data);
-
         assert_eq!(res, 88151870);
     }
 }
