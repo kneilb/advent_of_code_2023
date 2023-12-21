@@ -107,4 +107,13 @@ mod test {
 
         assert_eq!(result, 13);
     }
+
+    #[test]
+    fn test_a() {
+        let data = std::fs::read_to_string("data/day4.txt").unwrap();
+
+        let result = process_a(&data);
+
+        assert_eq!(result, 17782);
+    }
 }
