@@ -1,8 +1,8 @@
 #[derive(Debug)]
 struct Range {
-    from: u32,
-    to: u32,
-    len: u32,
+    from: u64,
+    to: u64,
+    len: u64,
 }
 
 impl Range {
@@ -38,17 +38,20 @@ impl Map {
         Map { from, to, ranges: Vec::new() }
     }
 
-    fn apply_map(&self, val: u32) -> u32 {
+    fn apply_map(&self, val: u64) -> u64 {
         for r in &self.ranges {
             if val >= r.from && val < r.from + r.len {
-                return val + r.to - r.from;
+                let new = val + r.to - r.from;
+                print!("{} to {}: {} -> {}\n", self.from, self.to, val, new);
+                return new;
             }
         }
+        print!("{} to {}: {} unchanged\n", self.from, self.to, val);
         val
     }
 }
 
-fn parse_seeds(input: &str) -> Vec<u32> {
+fn parse_seeds(input: &str) -> Vec<u64> {
     let line = input.lines().next().unwrap();
     let mut tokens = line.split("seeds: ");
     tokens.next();
@@ -74,7 +77,7 @@ fn parse_maps(input: &str) -> Vec<Map> {
     maps
 }
 
-fn process(input: &str) -> u32 {
+fn process(input: &str) -> u64 {
     let seeds = parse_seeds(input);
     // print!("NAB: seeds are {:?}\n", seeds);
     let maps = parse_maps(input);
@@ -113,5 +116,14 @@ mod test {
         let res = process(&data);
 
         assert_eq!(res, 35);
+    }
+
+    #[test]
+    fn test() {
+        let data = std::fs::read_to_string("data/day5.txt").unwrap();
+
+        let res = process(&data);
+
+        assert_eq!(res, 88151870);
     }
 }
