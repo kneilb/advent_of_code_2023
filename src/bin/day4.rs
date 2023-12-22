@@ -81,7 +81,7 @@ fn process_b(data: &str) -> u32 {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]
