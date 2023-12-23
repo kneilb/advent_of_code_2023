@@ -21,62 +21,55 @@ impl Game {
     fn parse(line: &str) -> Option<Game> {
         let mut parts = line.split(":");
 
-        let mut game_parts = parts.next().unwrap().split_whitespace();
-        game_parts.next();
-        let id: u32 = game_parts.next().unwrap().parse().unwrap();
+        let id = parts
+            .next()
+            .unwrap()
+            .split_whitespace()
+            .nth(1)
+            .unwrap()
+            .parse()
+            .unwrap();
 
-        let remains = parts.next().unwrap();
-        let mut rounds = vec![];
-
-        for round_string in remains.split(";") {
-            rounds.push(Round {
-                red: get_colour(round_string, "red"),
-                green: get_colour(round_string, "green"),
-                blue: get_colour(round_string, "blue"),
-            });
-        }
+        let rounds = parts
+            .next()
+            .unwrap()
+            .split(";")
+            .map(|r| Round {
+                red: get_colour(r, "red"),
+                green: get_colour(r, "green"),
+                blue: get_colour(r, "blue"),
+            })
+            .collect();
 
         Some(Game { id, rounds })
     }
 
     fn is_possible(&self, red: u32, green: u32, blue: u32) -> bool {
-        for r in &self.rounds {
-            if r.red > red || r.green > green || r.blue > blue {
-                return false;
-            }
-        }
-        true
+        !self
+            .rounds
+            .iter()
+            .any(|r| r.red > red || r.green > green || r.blue > blue)
     }
 
     fn get_minima(&self) -> Round {
-        let mut red = 0;
-        let mut green = 0;
-        let mut blue = 0;
-        for r in &self.rounds {
-            if r.red > red {
-                red = r.red;
-            }
-            if r.green > green {
-                green = r.green;
-            }
-            if r.blue > blue {
-                blue = r.blue;
-            }
-        }
+        let red = self.rounds.iter().map(|x| x.red).max().unwrap();
+        let green = self.rounds.iter().map(|x| x.green).max().unwrap();
+        let blue = self.rounds.iter().map(|x| x.blue).max().unwrap();
         Round { red, green, blue }
     }
 }
 
 fn get_colour(source: &str, colour: &str) -> u32 {
-    for colour_string in source.split(",") {
-        let mut colour_parts = colour_string.split_whitespace();
-        let num = colour_parts.next().unwrap().parse().unwrap();
-        let found_colour = colour_parts.next().unwrap().trim();
-        if colour == found_colour {
-            return num;
-        }
-    }
-    0
+    source
+        .split(",")
+        .map(|c| {
+            let mut colour_parts = c.split_whitespace();
+            let num = colour_parts.next().unwrap().parse().unwrap();
+            let colour = colour_parts.next().unwrap();
+            (colour, num)
+        })
+        .find_map(|(c, n)| if c == colour { Some(n) } else { None })
+        .unwrap_or(0)
 }
 
 fn process(data: &str) -> u32 {
