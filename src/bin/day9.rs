@@ -18,27 +18,16 @@ fn get_next_value(line: &str) -> u32 {
         sequences.push(next_seq);
     }
 
-    let extended_sequences: Vec<Vec<u32>> = sequences
-        .iter()
-        .rev()
-        .collect::<Vec<&Vec<u32>>>()
-        .windows(2)
-        .map(|w| {
-        This doesn't work, because we don't get the modified version as our next input...
-            let diff = w[0].last().unwrap();
-            let last = w[1].last().unwrap();
-            let mut new = w[1].clone();
-            new.push(last + diff);
-            new
-        })
-        .collect();
-
     let mut predictions = vec![0];
 
+    for s in sequences.iter().rev() {
+        predictions.push(s.last().unwrap() + predictions.last().unwrap());
+    }
 
-    print!("Seq: {:?}\n", sequences);
-    print!("Extended: {:?}\n", extended_sequences);
-    *extended_sequences.last().unwrap().last().unwrap()
+    // print!("Seq: {:?}\n", sequences);
+    // print!("Predictions: {:?}\n", predictions);
+
+    *predictions.last().unwrap()
 }
 
 fn process(input: &str) -> u32 {
@@ -59,6 +48,6 @@ mod tests {
     fn testicle() {
         let data = std::fs::read_to_string("data/day9_test_1.txt").unwrap();
         let result = process(&data);
-        assert_eq!(result, 0);
+        assert_eq!(result, 114);
     }
 }
