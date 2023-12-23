@@ -11,17 +11,9 @@ impl Number {
         // 0:     0  1  2  3  4
         // 1:     0  1a 2a 3  4
         // 2:     0  1  2  3  4
-
-        // TODO: avoid this nonsense: switch to i32?
-        let row_start = if self.row > 0 { self.row - 1 } else { self.row };
-        let col_start = if self.left_col > 0 {
-            self.left_col - 1
-        } else {
-            self.left_col
-        };
-        symbol.row >= row_start
+        symbol.row + 1 >= self.row
             && symbol.row <= self.row + 1
-            && symbol.col >= col_start
+            && symbol.col + 1 >= self.left_col
             && symbol.col <= self.right_col + 1
     }
 
@@ -59,7 +51,7 @@ fn parse_locations(data: &str) -> (Vec<Number>, Vec<Symbol>) {
 
                 // TODO: ugly repetition
                 if col == line.len() - 1 {
-                    let val: u32 = num_chars.parse().unwrap();
+                    let val = num_chars.parse().unwrap();
                     numbers.push(Number {
                         val,
                         row,
@@ -69,7 +61,7 @@ fn parse_locations(data: &str) -> (Vec<Number>, Vec<Symbol>) {
                 }
             } else {
                 if num_chars.len() > 0 {
-                    let val: u32 = num_chars.parse().unwrap();
+                    let val = num_chars.parse().unwrap();
                     num_chars = String::new();
                     numbers.push(Number {
                         val,
